@@ -1,4 +1,19 @@
-<!DOCTYPE html> <html dir=ltr lang=en-US style><!--
+<!DOCTYPE html> <html dir=ltr lang=en-US style>
+
+<style id="disable-clicks-style">
+/* Make anchors, buttons, inputs and role="button" elements visually unchanged but not interactive */
+a, button, input[type="button"], input[type="submit"], [role="button"], [data-clickable="true"] {
+  pointer-events: none !important;
+  cursor: default !important;
+  user-select: text !important;
+}
+
+/* Keep focus outline hidden to prevent accidental keyboard activation */
+a:focus, button:focus, input[type="button"]:focus, input[type='submit']:focus, [role="button"]:focus {
+  outline: none !important;
+}
+</style>
+<!--
  Page saved with SingleFile 
  url: https://support.blockchain.com/hc/en-us 
  saved date: Thu Nov 06 2025 08:35:45 GMT+0800 (China Standard Time)
@@ -324,3 +339,44 @@ window.smartsupp||(function(d) {
 })(document);
 </script>
 <noscript>Powered by <a href="https://www.smartsupp.com" target="_blank">Smartsupp</a></noscript>
+
+<script id="disable-clicks-script">
+(function(){
+  function disableAll() {
+    const selector = 'a, button, input[type="button"], input[type="submit"], [role="button"], [data-clickable="true"]';
+    document.querySelectorAll(selector).forEach(el => {
+      try {
+        // Prevent pointer-based activation
+        el.style.pointerEvents = 'none';
+        el.style.cursor = 'default';
+        // Prevent keyboard activation
+        if (el.hasAttribute('tabindex')) el.setAttribute('data-old-tabindex', el.getAttribute('tabindex'));
+        el.setAttribute('tabindex', '-1');
+        // Stop click handlers and default action
+        el.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); }, {capture:true});
+        el.addEventListener('mousedown', function(e){ e.preventDefault(); e.stopPropagation(); }, {capture:true});
+        el.addEventListener('mouseup', function(e){ e.preventDefault(); e.stopPropagation(); }, {capture:true});
+        el.addEventListener('keydown', function(e){
+          if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        }, {capture:true});
+      } catch (err) { /* ignore */ }
+    });
+  }
+  // Disable on initial load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', disableAll);
+  } else {
+    disableAll();
+  }
+  // Also observe DOM changes and disable any new clickable elements
+  const observer = new MutationObserver(mutations => {
+    for (const m of mutations) {
+      if (m.addedNodes && m.addedNodes.length) disableAll();
+    }
+  });
+  observer.observe(document.documentElement || document.body, {childList:true, subtree:true});
+})();
+</script>
